@@ -1,14 +1,20 @@
 class SearchController < ApplicationController
   def index
-    if params[:page].present?
-      page = params[:page]
+    if params[:search].present?
+      if params[:page].present?
+        page = params[:page]
+      else
+        page = 1
+      end
+
+      begin
+        @photos = Flickr.photos.search(text: params[:search], tags: params[:search], page: page, per_page: 10)
+        p @photos.count
+      rescue
+        redirect_to :root, :flash => { :error => "Something wrong, please try it again" }
+      end
     else
-      page = 1
-    end
-    begin
-      @photos = Flickr.photos.search(text: params[:search], page: page, per_page: 10)
-    rescue
-      redirect_to :root, :flash => { :error => "Something wrong, please try it again" }
+      redirect_to :root, :flash => { :error => "You must enter at least one character" }
     end
   end
 end
